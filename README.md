@@ -179,8 +179,15 @@ pip install -r requirements.txt
 创建 `.env` 文件，配置以下内容：
 
 ```
-# 数据库配置
+# 数据库配置（任选其一）
 DATABASE_URL=mysql+pymysql://username:password@localhost:3306/dbname
+# 或者使用拆分变量的方式，便于在不同环境中管理敏感信息
+DB_USERNAME=username
+DB_PASSWORD=password
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=dazuoye
+DB_PARAMS=charset=utf8mb4
 
 # JWT密钥
 JWT_SECRET_KEY=your-secret-key-here
@@ -192,6 +199,9 @@ SECRET_KEY=your-flask-secret-key
 UPLOAD_FOLDER=app/static/uploads
 MAX_UPLOAD_SIZE=16777216  # 16MB
 ```
+
+> 提示：若需要自定义数据库连接池，请根据 `app/config.py` 中的说明设置
+> `DB_POOL_SIZE`、`DB_POOL_RECYCLE` 和 `DB_MAX_OVERFLOW` 等高级参数。
 
 ### 4. 初始化数据库
 
@@ -263,6 +273,16 @@ python run.py
    - 模块化设计，便于扩展
    - API接口标准化
    - 前后端分离架构
+
+## 最近更新与反思
+
+- **2025-11-27：** 完成针对 MySQL 的统一配置，`app/config.py` 会自动优先读取
+  `DATABASE_URL`，若未提供则根据拆分变量拼接标准的 `mysql+pymysql` 连接字符串。
+  同时，在 `app/__init__.py` 中实现应用工厂和 `/health` 探针，确保部署后可快速
+  验证数据库连接是否正常。
+- **风险提醒：** 目前的数据模型仍处于占位状态，尚未真正创建表结构，因此运行
+  `flask db migrate` 之前需要先完善 `app/models/*.py`。此外，正式环境必须通过
+  `.env` 或容器环境变量覆盖默认的数据库账号与密钥，避免使用仓库中提供的示例值。
 
 ## 贡献指南
 
